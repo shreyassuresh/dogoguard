@@ -1,15 +1,18 @@
-import React from 'react';
+import { Stack } from 'expo-router';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { Provider as StoreProvider } from 'react-redux';
-import { store } from './src/store';
-import Navigation from './src/navigation';
+import { store } from '../src/store';
 
-export default function App() {
+export default function RootLayout() {
   return (
     <StoreProvider store={store}>
       <PaperProvider>
-        <Navigation />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        />
       </PaperProvider>
     </StoreProvider>
   );
-}
+} 
