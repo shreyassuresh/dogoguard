@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 18,
-    color: '#181c2f',
+    color: '#000000',
     alignSelf: 'center',
   },
   inputWrapper: {
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   forgotPasswordText: {
-    color: '#a020f0',
+    color: '#6c1e8f',
     fontSize: 14,
     textDecorationLine: 'underline',
   },
@@ -250,14 +250,13 @@ const styles = StyleSheet.create({
     marginTop: 25,
   },
   selectedBankText: {
+    color: '#fff',
     fontSize: 16,
-    color: '#6c1e8f',
-    fontWeight: 'bold',
     marginRight: 10,
   },
   selectedBankLogo: {
-    width: 40,
-    height: 25,
+    width: 30,
+    height: 30,
   },
 });
 

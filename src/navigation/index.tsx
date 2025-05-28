@@ -68,9 +68,9 @@ const MainNavigator = () => (
       name="AddTransaction"
       component={AddTransactionScreen}
       options={{
-        title: 'Add',
+        title: 'Map',
         tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="plus-circle" size={size} color={color} />
+          <MaterialCommunityIcons name="map-marker-radius" size={size} color={color} />
         ),
       }}
     />

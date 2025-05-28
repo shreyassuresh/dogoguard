@@ -1,175 +1,121 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { TextInput, Button, Text, SegmentedButtons, Portal, Dialog, List } from 'react-native-paper';
-import { useDispatch, useSelector } from 'react-redux';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { MainTabParamList } from '../../navigation/types';
-import type { RootState } from '../../store';
-import { addTransaction } from '../../store/slices/transactionsSlice';
-import type { Transaction, Wallet } from '../../types';
+import React from 'react';
+import { View, StyleSheet, Dimensions, Image, Alert } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
-type Props = NativeStackScreenProps<MainTabParamList, 'AddTransaction'>;
+const flagIcon = { uri: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png' };
 
-const AddTransactionScreen = ({ navigation }: Props) => {
-  const dispatch = useDispatch();
-  const { items: wallets } = useSelector((state: RootState) => state.wallets) as { items: Wallet[] };
+// Type definitions
+interface Transaction {
+  amount: number;
+  time: string;
+}
 
-  const [type, setType] = useState<'income' | 'expense'>('expense');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('');
-  const [description, setDescription] = useState('');
-  const [walletId, setWalletId] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [walletDialogVisible, setWalletDialogVisible] = useState(false);
+interface Place {
+  lat: number;
+  lng: number;
+  title: string;
+  transactions: Transaction[];
+}
 
-  const handleSubmit = async () => {
-    if (!amount || !category || !description || !walletId) {
-      // TODO: Show error message
-      return;
-    }
+const places: Place[] = [
+  {
+    lat: 22.3072,
+    lng: 73.1812,
+    title: 'Vadodara Railway Station',
+    transactions: [
+      { amount: 1200, time: '10:30 AM' },
+      { amount: 500, time: '2:15 PM' },
+    ],
+  },
+  {
+    lat: 22.2994,
+    lng: 73.2081,
+    title: 'Laxmi Vilas Palace',
+    transactions: [
+      { amount: 350, time: '9:00 AM' },
+    ],
+  },
+  {
+    lat: 22.3151,
+    lng: 73.1742,
+    title: 'Sayaji Baug',
+    transactions: [
+      { amount: 500, time: '4:45 PM' },
+    ],
+  },
+  {
+    lat: 22.3045,
+    lng: 73.1912,
+    title: 'Centre Square Mall',
+    transactions: [
+      { amount: 800, time: '1:20 PM' },
+    ],
+  },
+  {
+    lat: 22.3223,
+    lng: 73.1661,
+    title: 'Inorbit Mall',
+    transactions: [
+      { amount: 2000, time: '11:00 AM' },
+    ],
+  },
+];
 
-    setLoading(true);
-    try {
-      const selectedWallet = wallets.find(w => w.id === walletId);
-      if (!selectedWallet) {
-        throw new Error('Selected wallet not found');
-      }
+function showTransactionsAlert(place: Place): void {
+  if (!place.transactions.length) return;
+  const message = place.transactions
+    .map((txn: Transaction) => `• Rs. ${txn.amount} at ${txn.time}`)
+    .join('\n');
+  Alert.alert(
+    place.title,
+    message,
+    [{ text: 'OK' }],
+    { cancelable: true }
+  );
+}
 
-      const transaction: Omit<Transaction, 'id'> = {
-        type,
-        amount: parseFloat(amount),
-        category,
-        description,
-        walletId,
-        walletName: selectedWallet.name,
-        date: new Date().toISOString(),
-      };
-
-      dispatch(addTransaction(transaction as Transaction));
-      navigation.goBack();
-    } catch (error) {
-      console.error('Error adding transaction:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const selectedWallet = wallets.find(w => w.id === walletId);
-
+const AddTransactionScreen: React.FC = () => {
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView style={styles.content}>
-        <Text variant="headlineMedium" style={styles.title}>
-          Add Transaction
-        </Text>
-
-        <SegmentedButtons
-          value={type}
-          onValueChange={value => setType(value as 'income' | 'expense')}
-          buttons={[
-            { value: 'expense', label: 'Expense' },
-            { value: 'income', label: 'Income' },
-          ]}
-          style={styles.segmentedButtons}
-        />
-
-        <TextInput
-          label="Amount"
-          value={amount}
-          onChangeText={setAmount}
-          mode="outlined"
-          style={styles.input}
-          keyboardType="decimal-pad"
-          left={<TextInput.Affix text="$" />}
-        />
-
-        <TextInput
-          label="Category"
-          value={category}
-          onChangeText={setCategory}
-          mode="outlined"
-          style={styles.input}
-        />
-
-        <TextInput
-          label="Description"
-          value={description}
-          onChangeText={setDescription}
-          mode="outlined"
-          style={styles.input}
-          multiline
-        />
-
-        <TextInput
-          label="Wallet"
-          value={selectedWallet?.name || ''}
-          mode="outlined"
-          style={styles.input}
-          onPressIn={() => setWalletDialogVisible(true)}
-          editable={false}
-        />
-
-        <Button
-          mode="contained"
-          onPress={handleSubmit}
-          style={styles.button}
-          loading={loading}
-          disabled={loading}
-        >
-          Add Transaction
-        </Button>
-      </ScrollView>
-
-      <Portal>
-        <Dialog visible={walletDialogVisible} onDismiss={() => setWalletDialogVisible(false)}>
-          <Dialog.Title>Select Wallet</Dialog.Title>
-          <Dialog.Content>
-            <ScrollView>
-              {wallets.map(wallet => (
-                <List.Item
-                  key={wallet.id}
-                  title={wallet.name}
-                  description={`Balance: $${wallet.balance.toFixed(2)}`}
-                  onPress={() => {
-                    setWalletId(wallet.id);
-                    setWalletDialogVisible(false);
-                  }}
-                />
-              ))}
-            </ScrollView>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setWalletDialogVisible(false)}>Cancel</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </KeyboardAvoidingView>
+    <View style={styles.container}>
+      <MapView
+        provider={PROVIDER_GOOGLE}
+        style={styles.map}
+        initialRegion={{
+          latitude: 22.3072,
+          longitude: 73.1812,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+        mapType="standard"
+      >
+        {places.map((place: Place, idx: number) => (
+          <Marker
+            key={place.title + idx}
+            coordinate={{ latitude: place.lat, longitude: place.lng }}
+            title={place.title}
+            onPress={() => showTransactionsAlert(place)}
+          >
+            <Image source={flagIcon} style={styles.flagIcon} />
+          </Marker>
+        ))}
+      </MapView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
-  content: {
-    padding: 16,
+  map: {
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
   },
-  title: {
-    marginBottom: 24,
-  },
-  segmentedButtons: {
-    marginBottom: 24,
-  },
-  input: {
-    marginBottom: 16,
-  },
-  button: {
-    marginTop: 8,
-    paddingVertical: 8,
+  flagIcon: {
+    width: 32,
+    height: 32,
+    resizeMode: 'contain',
+    left: 10, // mimic the .flag-icon CSS
   },
 });
 

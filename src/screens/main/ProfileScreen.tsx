@@ -9,6 +9,16 @@ import { updateUserPreferences, clearUser } from '../../store/slices/userSlice';
 
 type Props = NativeStackScreenProps<MainTabParamList, 'Profile'>;
 
+const COLORS = {
+  background: '#0B0544',
+  card: '#6EC1E4',
+  accent: '#BFE8F9',
+  white: '#fff',
+  text: '#000',
+  income: '#4CAF50',
+  expense: '#FF5252',
+};
+
 const ProfileScreen = ({ navigation }: Props) => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -67,25 +77,31 @@ const ProfileScreen = ({ navigation }: Props) => {
             <List.Section>
               <List.Item
                 title="Notifications"
+                titleStyle={styles.listTitle}
                 right={() => (
                   <Switch
                     value={currentUser.preferences.notifications}
                     onValueChange={handleToggleNotifications}
+                    color={COLORS.accent}
                   />
                 )}
               />
               <List.Item
                 title="Dark Theme"
+                titleStyle={styles.listTitle}
                 right={() => (
                   <Switch
                     value={currentUser.preferences.theme === 'dark'}
                     onValueChange={handleToggleTheme}
+                    color={COLORS.accent}
                   />
                 )}
               />
               <List.Item
                 title="Currency"
+                titleStyle={styles.listTitle}
                 description={currentUser.preferences.currency}
+                descriptionStyle={styles.listDescription}
                 onPress={() => {
                   // TODO: Show currency picker
                 }}
@@ -106,6 +122,8 @@ const ProfileScreen = ({ navigation }: Props) => {
                 // TODO: Show export data dialog
               }}
               style={styles.actionButton}
+              textColor={COLORS.background}
+              buttonColor={COLORS.accent}
             >
               Export Data
             </Button>
@@ -116,6 +134,8 @@ const ProfileScreen = ({ navigation }: Props) => {
                 // TODO: Show delete account dialog
               }}
               style={styles.actionButton}
+              textColor={COLORS.expense}
+              buttonColor={COLORS.white}
             >
               Delete Account
             </Button>
@@ -124,6 +144,8 @@ const ProfileScreen = ({ navigation }: Props) => {
               mode="contained"
               onPress={handleLogout}
               style={styles.logoutButton}
+              buttonColor={COLORS.expense}
+              textColor={COLORS.white}
             >
               Logout
             </Button>
@@ -137,34 +159,65 @@ const ProfileScreen = ({ navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 16,
   },
   profileCard: {
     marginBottom: 24,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    elevation: 3,
   },
   name: {
     marginBottom: 4,
+    color: COLORS.white,
+    fontWeight: 'bold',
+    fontSize: 22,
   },
   email: {
     opacity: 0.7,
+    color: COLORS.white,
+    fontSize: 15,
   },
   settingsCard: {
     marginBottom: 24,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    elevation: 2,
   },
   sectionTitle: {
     marginBottom: 16,
+    color: COLORS.accent,
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  listTitle: {
+    color: COLORS.white,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  listDescription: {
+    color: COLORS.background,
+    fontSize: 14,
+    opacity: 0.8,
   },
   actionsCard: {
     marginBottom: 24,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    elevation: 2,
   },
   actionButton: {
     marginBottom: 12,
+    borderRadius: 10,
+    borderWidth: 0,
   },
   logoutButton: {
     marginTop: 8,
+    borderRadius: 10,
+    borderWidth: 0,
   },
 });
 

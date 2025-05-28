@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Image, Text as RNText, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useSelector } from 'react-redux';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainTabParamList } from '../../navigation/types';
 import type { RootState } from '../../store';
@@ -60,12 +61,19 @@ const bankData = {
   }
 };
 
+type BudgetCategory = {
+  category: string;
+  spent: number;
+  total: number;
+  icon: keyof typeof MaterialCommunityIcons.glyphMap;
+};
+
 // Sample budget data
-const budgetCategories = [
-  { category: 'Food', spent: 2500, total: 5000, icon: '🍔' },
-  { category: 'Transport', spent: 1200, total: 2000, icon: '🚌' },
-  { category: 'Entertainment', spent: 800, total: 1500, icon: '🎬' },
-  { category: 'Shopping', spent: 3000, total: 4000, icon: '🛍️' },
+const budgetCategories: BudgetCategory[] = [
+  { category: 'Food', spent: 2500, total: 5000, icon: 'food-fork-drink' },
+  { category: 'Transport', spent: 1200, total: 2000, icon: 'bus' },
+  { category: 'Entertainment', spent: 800, total: 1500, icon: 'movie-roll' },
+  { category: 'Shopping', spent: 3000, total: 4000, icon: 'cart' },
 ];
 
 type Transaction = {
@@ -92,8 +100,8 @@ type Props = NativeStackScreenProps<MainTabParamList, 'Home'>;
 
 const HomeScreen = ({ navigation }: Props) => {
   const { items: wallets } = useSelector((state: RootState) => state.wallets) as { items: Wallet[] };
-  const selectedBank = (wallets[0] as any)?.bankName || 'State Bank of India'; // Default to SBI if no bank selected
-  const bankInfo = (bankData as BankData)[selectedBank];
+  const { selectedBank } = useSelector((state: RootState) => state.user) as { selectedBank: { name: string; logo: any } | null };
+  const bankInfo = selectedBank ? (bankData as BankData)[selectedBank.name] : null;
   const totalBalance = bankInfo?.balance || 0;
   const transactions = bankInfo?.transactions || [];
 
@@ -119,14 +127,14 @@ const HomeScreen = ({ navigation }: Props) => {
       {/* Logo and Bank Info */}
       <View style={styles.logoRow}>
         <Image 
-          source={bankInfo?.logo || require('../../../assets/Dogonew.png')} 
+          source={selectedBank?.logo || require('../../../assets/Dogonew.png')} 
           style={styles.logo}
           onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
           defaultSource={require('../../../assets/icon.png')}
         />
         <View style={styles.bankInfo}>
-          <Text style={styles.bankName}>{selectedBank}</Text>
-          <Text style={styles.accountNumber}>A/C: {bankInfo?.accountNumber}</Text>
+          <Text style={styles.bankName}>{selectedBank?.name || 'Select a Bank'}</Text>
+          <Text style={styles.accountNumber}>A/C: {bankInfo?.accountNumber || 'Not Available'}</Text>
         </View>
       </View>
 
@@ -188,7 +196,12 @@ const HomeScreen = ({ navigation }: Props) => {
           <View key={index} style={styles.budgetItem}>
             <View style={styles.budgetHeader}>
               <View style={styles.budgetCategoryContainer}>
-                <Text style={styles.budgetIcon}>{budget.icon}</Text>
+                <MaterialCommunityIcons 
+                  name={budget.icon} 
+                  size={24} 
+                  color={COLORS.white} 
+                  style={styles.budgetIcon}
+                />
                 <Text style={styles.budgetCategory}>{budget.category}</Text>
               </View>
               <Text style={styles.budgetAmount}>Rs. {budget.spent} / Rs. {budget.total}</Text>
@@ -364,7 +377,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   budgetIcon: {
-    fontSize: 20,
     marginRight: 8,
   },
   budgetCategory: {

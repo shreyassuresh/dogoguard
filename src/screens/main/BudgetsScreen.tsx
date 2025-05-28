@@ -10,6 +10,16 @@ import type { Budget } from '../../types';
 
 type Props = NativeStackScreenProps<MainTabParamList, 'Budgets'>;
 
+const COLORS = {
+  background: '#0B0544',
+  card: '#6EC1E4',
+  accent: '#BFE8F9',
+  white: '#fff',
+  text: '#000',
+  income: '#4CAF50',
+  expense: '#FF5252',
+};
+
 const BudgetsScreen = ({ navigation }: Props) => {
   const dispatch = useDispatch();
   const { items: budgets } = useSelector((state: RootState) => state.budgets) as { items: Budget[] };
@@ -50,7 +60,7 @@ const BudgetsScreen = ({ navigation }: Props) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.content}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 32 }}>
         <Text variant="headlineMedium" style={styles.title}>
           Budgets
         </Text>
@@ -59,9 +69,9 @@ const BudgetsScreen = ({ navigation }: Props) => {
           <Card key={budget.id} style={styles.budgetCard}>
             <Card.Content>
               <View style={styles.budgetHeader}>
-                <Text variant="titleMedium">{budget.category}</Text>
-                <Text variant="titleMedium">
-                  ${budget.spent.toFixed(2)} / ${budget.amount.toFixed(2)}
+                <Text style={styles.category}>{budget.category}</Text>
+                <Text style={styles.amount}>
+                  Rs. {budget.spent.toFixed(2)} / Rs. {budget.amount.toFixed(2)}
                 </Text>
               </View>
               <View style={styles.progressBar}>
@@ -71,22 +81,20 @@ const BudgetsScreen = ({ navigation }: Props) => {
                     {
                       width: `${Math.min((budget.spent / budget.amount) * 100, 100)}%`,
                       backgroundColor:
-                        budget.spent > budget.amount ? '#B00020' : '#6200ee',
+                        budget.spent > budget.amount ? COLORS.expense : COLORS.accent,
                     },
                   ]}
                 />
               </View>
-              <Text variant="bodySmall" style={styles.period}>
-                {budget.period}
-              </Text>
+              <Text style={styles.period}>{budget.period}</Text>
             </Card.Content>
           </Card>
         ))}
       </ScrollView>
 
       <Portal>
-        <Dialog visible={visible} onDismiss={() => setVisible(false)}>
-          <Dialog.Title>Add Budget</Dialog.Title>
+        <Dialog visible={visible} onDismiss={() => setVisible(false)} style={styles.dialog}>
+          <Dialog.Title style={styles.dialogTitle}>Add Budget</Dialog.Title>
           <Dialog.Content>
             <TextInput
               label="Category"
@@ -94,6 +102,7 @@ const BudgetsScreen = ({ navigation }: Props) => {
               onChangeText={setCategory}
               mode="outlined"
               style={styles.input}
+              theme={{ colors: { text: COLORS.text, primary: COLORS.accent } }}
             />
             <TextInput
               label="Amount"
@@ -102,7 +111,8 @@ const BudgetsScreen = ({ navigation }: Props) => {
               mode="outlined"
               style={styles.input}
               keyboardType="decimal-pad"
-              left={<TextInput.Affix text="$" />}
+              left={<TextInput.Affix text="Rs." />}
+              theme={{ colors: { text: COLORS.text, primary: COLORS.accent } }}
             />
             <Text variant="bodyMedium" style={styles.periodLabel}>
               Period
@@ -120,11 +130,13 @@ const BudgetsScreen = ({ navigation }: Props) => {
             />
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setVisible(false)}>Cancel</Button>
+            <Button onPress={() => setVisible(false)} textColor={COLORS.expense}>Cancel</Button>
             <Button
               onPress={handleAddBudget}
               loading={loading}
               disabled={loading}
+              buttonColor={COLORS.accent}
+              textColor={COLORS.text}
             >
               Add
             </Button>
@@ -135,6 +147,8 @@ const BudgetsScreen = ({ navigation }: Props) => {
       <FAB
         icon="plus"
         style={styles.fab}
+        color={COLORS.background}
+        customSize={56}
         onPress={() => setVisible(true)}
       />
     </View>
@@ -144,41 +158,67 @@ const BudgetsScreen = ({ navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   content: {
     padding: 16,
   },
   title: {
+    color: COLORS.white,
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginTop: 24,
     marginBottom: 24,
+    letterSpacing: 1,
   },
   budgetCard: {
-    marginBottom: 12,
+    marginBottom: 16,
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+    elevation: 3,
   },
   budgetHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 8,
   },
+  category: {
+    color: COLORS.white,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  amount: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   progressBar: {
-    height: 8,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 4,
+    height: 10,
+    backgroundColor: COLORS.accent,
+    borderRadius: 5,
     overflow: 'hidden',
+    marginTop: 4,
   },
   progressFill: {
     height: '100%',
-    borderRadius: 4,
+    borderRadius: 5,
   },
   period: {
     marginTop: 8,
-    opacity: 0.7,
+    color: COLORS.accent,
+    fontWeight: 'bold',
+    fontSize: 13,
+    opacity: 0.9,
   },
   input: {
     marginBottom: 16,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
   },
   periodLabel: {
     marginBottom: 8,
+    color: COLORS.text,
+    fontWeight: 'bold',
   },
   segmentedButtons: {
     marginBottom: 16,
@@ -188,6 +228,17 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
+    backgroundColor: COLORS.accent,
+    borderRadius: 28,
+    elevation: 4,
+  },
+  dialog: {
+    backgroundColor: COLORS.card,
+    borderRadius: 16,
+  },
+  dialogTitle: {
+    color: COLORS.background,
+    fontWeight: 'bold',
   },
 });
 
