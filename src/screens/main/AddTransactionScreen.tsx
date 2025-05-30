@@ -63,13 +63,40 @@ const places: Place[] = [
 
 function showTransactionsAlert(place: Place): void {
   if (!place.transactions.length) return;
+  
   const message = place.transactions
     .map((txn: Transaction) => `• Rs. ${txn.amount} at ${txn.time}`)
     .join('\n');
+
   Alert.alert(
     place.title,
     message,
-    [{ text: 'OK' }],
+    [
+      {
+        text: 'View Details',
+        onPress: () => {
+          // Show detailed transaction information
+          const details = place.transactions
+            .map((txn: Transaction) => 
+              `Transaction Details:\n` +
+              `Amount: Rs. ${txn.amount}\n` +
+              `Time: ${txn.time}\n` +
+              `Location: ${place.title}\n` +
+              `Status: Completed\n` +
+              `Type: ${txn.amount > 0 ? 'Income' : 'Expense'}`
+            )
+            .join('\n\n');
+          
+          Alert.alert(
+            'Transaction Details',
+            details,
+            [{ text: 'Close' }],
+            { cancelable: true }
+          );
+        }
+      },
+      { text: 'Close' }
+    ],
     { cancelable: true }
   );
 }
