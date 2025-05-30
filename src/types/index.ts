@@ -27,11 +27,18 @@ export interface Budget {
 
 export interface User {
   id: string;
-  email: string;
   name: string;
+  email: string;
+  profileImage?: string;
   preferences: {
-    currency: string;
-    theme: 'light' | 'dark';
     notifications: boolean;
+    theme: 'light' | 'dark';
+    currency: string;
   };
+}
+
+export interface UserState {
+  currentUser: User | null;
+  loading: boolean;
+  error: string | null;
 } 

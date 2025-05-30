@@ -11,6 +11,7 @@ export type MainTabParamList = {
   AddTransaction: undefined;
   Budgets: undefined;
   Profile: undefined;
+  SendMoney: undefined;
 };
 
 export type AuthStackParamList = {
